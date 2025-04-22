@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Price Point Calculator</title>
+  <!-- Import Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #a175e8;
+      --bg-color: #f9f7fc;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --input-border: #e0e0e0;
+      --recommend-bg: #fff4e5;
+      --recommend-border: #ffd699;
+      --warning-bg: #fdecea;
+      --warning-border: #f5c6cb;
+      --warning-text: #9a0420;
+      --gauge-bg: #e0e0e0;
+      --gauge-fill: #a175e8;
+      --gauge-pointer: #ff6f61;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-color); font-family: 'Inter', sans-serif; color: var(--text-color); padding: 2rem; }
+    h1 { text-align: center; color: var(--primary-color); margin-bottom: 1rem; }
+    .calculator { display: flex; flex-wrap: wrap; gap: 2rem; max-width: 900px; margin: 0 auto; }
+    .inputs, .output { flex: 1 1 300px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); padding: 1.5rem; }
+    .inputs h2, .output h2 { color: var(--primary-color); font-size: 1.25rem; text-align: center; margin-bottom: 1rem; }
+    .info-box { background: var(--card-bg); border-left: 4px solid var(--primary-color); padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); font-size: 0.9rem; color: #555; }
+    .info-box ol { padding-left: 1.2rem; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.25rem; font-weight: 500; }
+    .field-row { display: flex; align-items: center; gap: 1rem; }
+    input[type=range] { flex: 1; -webkit-appearance: none; height: 6px; background: var(--input-border); border-radius: 3px; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--primary-color); cursor: pointer; }
+    input[type=number] { width: 80px; padding: 0.5rem; border: 1px solid var(--input-border); border-radius: 8px; }
+    select { width: 100%; padding: 0.75rem; border: 1px solid var(--input-border); border-radius: 8px; }
+    .warning { margin-top: 0.5rem; padding: 0.75rem; background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; color: var(--warning-text); font-size: 0.9rem; }
+    .warning:empty { display: none; }
+    #calculateBtn { width: 100%; padding: 0.75rem; background: var(--primary-color); color: #fff; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-top: 0.5rem; }
+    .results p { margin-bottom: 0.75rem; font-size: 1rem; }
+    .results p span { font-weight: 600; }
+    .gauge { position: relative; height: 12px; background: var(--gauge-bg); border-radius: 6px; margin: 1rem 0; }
+    .gauge-fill { height: 100%; background: var(--gauge-fill); border-radius: 6px 0 0 6px; width: 0; }
+    .gauge-pointer { position: absolute; top: -4px; width: 2px; height: 20px; background: var(--gauge-pointer); left: 0px; }
+    .recommendations { margin-top: 1rem; padding: 1rem; background: var(--recommend-bg); border: 1px solid var(--recommend-border); border-radius: 8px; }
+    .recommendations ul { list-style: disc; margin-left: 1.2rem; }
+    .note { font-size: 0.85rem; color: var(--primary-color); margin-top: 0.25rem; }
+    footer { text-align: center; margin-top: 2rem; font-size: 0.9rem; color: #777; }
+  </style>
+</head>
+<body>
+  <h1>Price Point Calculator</h1>
+  <div class="calculator">
+    <div class="inputs">
+      <h2>Cost and Market Details</h2>
+      <div class="info-box">
+        <strong>How it works:</strong>
+        <ol>
+          <li>Select your <strong>Product Type</strong> to load the margin range.</li>
+          <li>Adjust costs & margins with sliders or inputs.</li>
+          <li>Enter low & high market prices.</li>
+          <li>Click <strong>Calculate</strong> Click Calculate to uncover your optimal price point, benchmark your position against competitors, and get tailored, actionable recommendations to boost your margins.</li>
+        </ol>
+      </div>
+      <div class="form-group">
+        <label for="productType">Product Type</label>
+        <select id="productType">
+          <option value="" disabled selected>Select a type</option>
+        </select>
+        <div id="profitRangeInfo" class="note"></div>
+      </div>
+      <div class="form-group field-row">
+        <label for="productCost">Product Cost ($)</label>
+        <input id="productCost" type="range" min="0" max="100" step="0.5" value="10" />
+        <input id="productCostNum" type="number" min="0" step="0.01" value="10" />
+      </div>
+      <div class="form-group field-row">
+        <label for="packagingCost">Packaging Cost ($)</label>
+        <input id="packagingCost" type="range" min="0" max="20" step="0.5" value="2" />
+        <input id="packagingCostNum" type="number" min="0" step="0.01" value="2" />
+      </div>
+      <div class="form-group field-row">
+        <label for="labelCost">Label/Insert Cost ($)</label>
+        <input id="labelCost" type="range" min="0" max="10" step="0.1" value="1" />
+        <input id="labelCostNum" type="number" min="0" step="0.01" value="1" />
+      </div>
+      <div class="form-group field-row">
+        <label for="paymentFee">Payment Fees (%)</label>
+        <input id="paymentFee" type="range" min="0" max="10" step="0.1" value="2.9" />
+        <input id="paymentFeeNum" type="number" min="0" step="0.1" value="2.9" />
+      </div>
+      <div class="form-group field-row">
+        <label for="profitMargin">Desired Profit Margin (%)</label>
+        <input id="profitMargin" type="range" min="0" max="100" step="1" value="50" />
+        <input id="profitMarginNum" type="number" min="0" step="1" value="50" />
+      </div>
+      <div id="marginWarning" class="warning"></div>
+      <div class="form-group field-row">
+        <label for="marketPriceLow">Lowest Market Price ($)</label>
+        <input id="marketPriceLow" type="range" min="0" max="100" step="0.5" value="10" />
+        <input id="marketPriceLowNum" type="number" min="0" step="0.01" value="10" />
+      </div>
+      <div class="form-group field-row">
+        <label for="marketPriceHigh">Highest Market Price ($)</label>
+        <input id="marketPriceHigh" type="range" min="0" max="200" step="0.5" value="20" />
+        <input id="marketPriceHighNum" type="number" min="0" step="0.01" value="20" />
+      </div>
+      <button id="calculateBtn" type="button">Calculate</button>
+    </div>
+    <div class="output">
+      <h2>Your Profit Summary</h2>
+      <div class="results">
+        <p>Total Cost: $<span id="totalCost">--</span></p>
+        <p>Suggested Price: $<span id="suggestedPrice">--</span></p>
+        <p>Profit per Unit: $<span id="profitPerUnit">--</span></p>
+        <p>Profit Margin: <span id="profitMarginPercent">--</span></p>
+        <p>Avg Market Price: $<span id="avgMarketPrice">--</span></p>
+        <p>Comparison: <span id="marketComparison">--</span></p>
+      </div>
+      <div class="gauge"><div class="gauge-fill"></div><div class="gauge-pointer"></div></div>
+      <div id="recommendations" class="recommendations"></div>
+    </div>
+  </div>
+  <footer>© Jonathan Rapalo</footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const productTypeRanges = {
+        'Lashes / Cosmetics': [75, 85],
+        'Skincare': [65, 85],
+        'Haircare': [55, 70],
+        'Fragrance': [70, 85],
+        'Body Care (Soaps, Oils, etc.)': [60, 75],
+        'Beauty Tools / Accessories': [50, 65],
+        'Jewelry': [70, 90],
+        'Nail Products': [60, 75],
+        'Makeup (Foundations, Lipsticks)': [65, 80],
+        'Bath & Shower (Salts, Gels)': [55, 75],
+        "Men's Grooming (Pomades, Beard Oils)": [50, 70]
+      };
+
+      const sel = document.getElementById('productType');
+      Object.keys(productTypeRanges).forEach(type => {
+        sel.append(new Option(type, type));
+      });
+
+      function updateRangeInfo() {
+        const type = sel.value;
+        const range = productTypeRanges[type];
+        document.getElementById('profitRangeInfo').textContent = range
+          ? `Average profit margin: ${range[0]}–${range[1]}%` : '';
+      }
+
+      function clearResults() {
+        ['totalCost', 'suggestedPrice', 'profitPerUnit', 'profitMarginPercent', 'avgMarketPrice', 'marketComparison']
+          .forEach(id => document.getElementById(id).innerText = '--');
+        document.getElementById('recommendations').innerHTML = '';
+        document.querySelector('.gauge-fill').style.width = '0%';
+        document.querySelector('.gauge-pointer').style.left = '0px';
+      }
+
+      function renderRecommendations(comp) {
+        let html = '';
+        switch (comp) {
+          case '🎉 Healthy price':
+            html = '<strong>Next Steps:</strong><ul><li>You Can Adjust 1-$2 max!</li><li>Monitor competitors!</li></ul>';
+            break;
+          case '⚠️ Premium Tier':
+            html = '<strong>Next Steps:</strong><ul><li>Emphasize premium features.</li><li>Maintain brand positioning (dont recommend for total beginners.</li></ul>';
+            break;
+          case '🚨 Overpriced Risk':
+            html = '<strong>Tip:</strong><ul><li>Lower price to align market.</li><li>or Highlight value.</li></ul>';
+            break;
+          case '🚨 Profit Risk':
+            html = '<strong>Next Steps:</strong><ul><li>Increase margin.</li><li>Recalculate.</li></ul>';
+            break;
+          case '👍 Good, almost there!':
+            html = '<strong>You Got Room!</strong>' +
+       '<ul>' +
+         '<li>You can increase profit margins a bit if you’d like, but this is a solid starting point.</li>' +
+       '</ul>';
+break;
+
+        }
+        document.getElementById('recommendations').innerHTML = html;
+      }
+
+      function calculatePrice() {
+        const getVal = id => parseFloat(document.getElementById(id).value) || 0;
+        const pc = getVal('productCost');
+        const pk = getVal('packagingCost');
+        const li = getVal('labelCost');
+        const pf = getVal('paymentFee');
+        const pm = getVal('profitMargin');
+        const ml = getVal('marketPriceLow');
+        const mh = getVal('marketPriceHigh');
+        const type = sel.value;
+        const [min, max] = productTypeRanges[type] || [];
+
+        if (pm + pf >= 100) {
+          document.getElementById('marginWarning').textContent = '⚠️ Profit margin + fees must be <100%.';
+          clearResults();
+          return;
+        }
+        if (min !== undefined && (pm < min || pm > max)) {
+          document.getElementById('marginWarning').textContent =
+            `⚠️ Margin ${pm}% is ${pm < min ? 'below' : 'above'} average (${min}–${max}%)`;
+        } else {
+          document.getElementById('marginWarning').textContent = '';
+        }
+
+        const total = pc + pk + li;
+        const base = total / (1 - (pm + pf) / 100);
+        const sug = Math.floor(base) + 0.99;
+        const profit = sug - total;
+        const pmPerc = sug > 0 ? (profit / sug) * 100 : 0;
+        const avg = (ml + mh) / 2;
+        const diff = base - avg;
+        const dist = mh - base;
+        let comp = '';
+        if (diff >= 1 && diff <= 4) comp = '🎉 Healthy price';
+        else if (dist >= 1 && dist <= 5) comp = '⚠️ Premium Tier';
+        else if (diff > avg * 0.2) comp = '🚨 Overpriced Risk';
+        else if (diff <= -5) comp = '🚨 Profit Risk';
+        else if (diff !== 0) comp = '👍 Good, almost there!';
+
+        document.getElementById('totalCost').innerText = total.toFixed(2);
+        document.getElementById('suggestedPrice').innerText = sug.toFixed(2);
+        document.getElementById('profitPerUnit').innerText = profit.toFixed(2);
+        document.getElementById('profitMarginPercent').innerText = pmPerc.toFixed(1) + '%';
+        document.getElementById('avgMarketPrice').innerText = avg.toFixed(2);
+        document.getElementById('marketComparison').innerText = comp;
+
+        const gaugeFill = document.querySelector('.gauge-fill');
+        const gaugePtr = document.querySelector('.gauge-pointer');
+        const width = document.querySelector('.gauge').clientWidth;
+        const pct = (sug - ml) / (mh - ml);
+        gaugeFill.style.width = `${Math.max(0, Math.min(pct, 1)) * 100}%`;
+        gaugePtr.style.left = `${Math.max(0, Math.min(pct, 1)) * width}px`;
+
+        renderRecommendations(comp);
+      }
+
+      // Sync sliders and number inputs
+      ['productCost','packagingCost','labelCost','paymentFee','profitMargin','marketPriceLow','marketPriceHigh'].forEach(id => {
+        const rng = document.getElementById(id);
+        const num = document.getElementById(id + 'Num');
+        rng.addEventListener('input', () => num.value = rng.value);
+        num.addEventListener('input', () => rng.value = num.value);
+      });
+
+      document.getElementById('calculateBtn').addEventListener('click', calculatePrice);
+      sel.addEventListener('change', updateRangeInfo);
+      updateRangeInfo();
+    });
+  </script>
+</body>
+</html>
+
